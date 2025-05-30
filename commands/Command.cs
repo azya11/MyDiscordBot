@@ -20,12 +20,14 @@ namespace MyTaskManagerBot.commands
         }
 
         [Command("create_task")]
+        [Description("Creates Task with two intakes name as string and due date as int")]
 
-        public async  Task CreateTaskCommand(CommandContext ctx, [RemainingText] string taskName)
+        public async  Task CreateTaskCommand(CommandContext ctx, string taskName, string deadline)
         {
+            var avatar = ctx.User.AvatarUrl;
             // Here you would implement the logic to create a task
             // For now, we will just acknowledge the command
-            await ctx.Channel.SendMessageAsync($"Task '{taskName}' has been created!");
+            await ctx.Channel.SendMessageAsync($"Task '{taskName}'{avatar} has been created!");
         }
     }
 }
