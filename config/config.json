@@ -1,0 +1,4 @@
+﻿{
+    "Token": "your_token", //Token is  hidden in Bin/Debug/config.json change it to your bot token, and then save it to the /bin/debug folder
+    "Prefix": "!"
+}
