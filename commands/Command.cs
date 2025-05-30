@@ -20,7 +20,6 @@ namespace MyTaskManagerBot.commands
         }
 
         [Command("create_task")]
-        [Description("Creates Task with two intakes name as string and due date as int")]
 
         public async  Task CreateTaskCommand(CommandContext ctx, string taskName, string deadline)
         {
