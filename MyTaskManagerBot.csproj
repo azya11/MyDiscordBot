@@ -151,6 +151,7 @@
     <None Include="App.config" />
     <None Include="config\config.json" />
     <None Include="packages.config" />
+    <None Include="README.rd" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
