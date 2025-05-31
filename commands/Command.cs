@@ -20,11 +20,12 @@ namespace MyTaskManagerBot.commands
             string username = ctx.User.Username;   //ctx. containts nearly everything that bot can do, just type ctx. and look what it can do
             var avatar = ctx.User.AvatarUrl;
             await ctx.Channel.SendMessageAsync($"Hello, {username}" + "\n"
-                + "This is bot was created to play Mafia with your friends on discord!" + "\n"
+                + "This is bot was created to play Mafia with your friends on discord!" + "\n" + "\n"
                 + "Here is the list of commands available:" + "\n"
                 + "!create_game - creates a new Mafia Game in this channel" + "\n"
                 + "!join - adds user to the existing game" + "\n"
                 + "!ready - sets the game to ready, only creator of the game can call this command" + "\n"
+                + "!contacts - if you want to contact me" + "\n"
                 );
 
             }
@@ -99,6 +100,13 @@ namespace MyTaskManagerBot.commands
                         }
                     }
                 }
+            }
+            [Command("contacts")]
+            public async Task ContactsCommand(CommandContext ctx)
+            {
+                await ctx.Channel.SendMessageAsync("Hey, My name is Aziz Shamuratov. I've developed this bot for you to enjoy. My discord is .azya \n"
+                    + "If you have any questions or suggestions, feel free to contact me! \n"
+                    + "I hope you enjoy playing Mafia with your friends!");
             }
 
     }
