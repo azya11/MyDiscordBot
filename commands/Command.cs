@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 
 namespace MyTaskManagerBot.commands
@@ -17,16 +18,13 @@ namespace MyTaskManagerBot.commands
         [Command("help")]
         public async Task HelpCommand(CommandContext ctx)
         {
-            string username = ctx.User.Username;   //ctx. containts nearly everything that bot can do, just type ctx. and look what it can do
-            var avatar = ctx.User.AvatarUrl;
-            await ctx.Channel.SendMessageAsync($"Hello, {username}" + "\n"
-                + "This is bot was created to play Mafia with your friends on discord!" + "\n" + "\n"
-                + "Here is the list of commands available:" + "\n"
-                + "!create_game - creates a new Mafia Game in this channel" + "\n"
-                + "!join - adds user to the existing game" + "\n"
-                + "!ready - sets the game to ready, only creator of the game can call this command" + "\n"
-                + "!contacts - if you want to contact me" + "\n"
-                );
+            var message = new DiscordEmbedBuilder
+            {
+                Title = "HELP",
+                Color = DiscordColor.Blue,
+                Description = "Here is the list of commands available:\n!create_game - creates a new Mafia Game in this channel\n!join - adds user to the existing game\n!ready - sets the game to ready, only creator of the game can call this comman\n!contacts - if you want to contact me"
+            };
+            await ctx.Channel.SendMessageAsync(embed: message);
 
             }
 
@@ -45,14 +43,29 @@ namespace MyTaskManagerBot.commands
                 {
                     if (game.ChannelId == ctx.Channel.Id)
                     {
-                        await ctx.Channel.SendMessageAsync("There is already a game in this channel!"); //If there is, send a message
+                        var message = new DiscordEmbedBuilder
+                        {
+                            Title = "Game already exists",
+                            Color = DiscordColor.Red,
+                            Description = "There is already a game in this channel! \nYou can join it by typing !join"
+                        };
+                        await ctx.Channel.DeleteMessageAsync(ctx.Message);
+                        var lastmessage = await ctx.Channel.SendMessageAsync(embed: message); //If there is, send a message
+                        await Task.Delay(5000); //Wait for 5 seconds before deleting the message
+                        await lastmessage.DeleteAsync(); //Delete the message after 5 seconds
                         return; //Exit the method
                     }
                 }
             }
-                await newGame.AddPlayer(ctx.User.Username); //Add the player who created the game to the game
+                await newGame.AddPlayer(ctx.User.Id); //Add the player who created the game to the game
                 this.currentGames.Add(newGame);
-                await ctx.Channel.SendMessageAsync($"New game has been created!, join by typing !join");
+            var created = new DiscordEmbedBuilder
+            {
+                Title = "New game has been created!",
+                Description = "Type !join to enter the game",
+                Color = DiscordColor.Green
+            };
+                await ctx.Channel.SendMessageAsync(embed: created);
         }
 
         [Command("join")]
@@ -60,17 +73,44 @@ namespace MyTaskManagerBot.commands
             {
             if(this.currentGames == null || !this.currentGames.Any()) //Check if there are any games in the list
                 {
-                    await ctx.Channel.SendMessageAsync("There are no games to join!"); //If there are no games, send a message
-                    return; //Exit the method
+                    var message = new DiscordEmbedBuilder
+                    {
+                        Title = "No games available",
+                        Color = DiscordColor.Red,
+                        Description = "There are no games to join! \nYou can create a new game by typing !create_game"
+                    };
+                await ctx.Channel.DeleteMessageAsync(ctx.Message); //Delete the message that called the command
+                var lastmessage = await ctx.Channel.SendMessageAsync(embed: message); //If there are no games, send a message
+                await Task.Delay(5000);
+                await lastmessage.DeleteAsync();
+
+                return; //Exit the method
                 }
             foreach (var game in this.currentGames)
                 {
                     if (game.ChannelId == ctx.Channel.Id)
                     {
-                        await game.AddPlayer(ctx.User.Username);
-                        await ctx.Channel.SendMessageAsync($"{ctx.User.Username} have joined the game! Players in the game: {string.Join(", ", game.Players.Select(p => p.ToString()))}"); //Send a message with the players in the game
+                        await game.AddPlayer(ctx.User.Id);
+                        var okaymessage = new DiscordEmbedBuilder
+                    {
+                        Title = $"{ctx.User.Username} have joined the game!",
+                        Description = $"Players in the game:\n{string.Join("\n", game.Players.Select(p => p.ToString()))}",
+                        Color = DiscordColor.Green
+                    };
+                    await ctx.Channel.SendMessageAsync(embed: okaymessage);
                     }
-                    else {await ctx.Channel.SendMessageAsync("There is no game in this channel!"); }
+                    else {
+                    var message = new DiscordEmbedBuilder
+                    {
+                        Title = "No games available",
+                        Color = DiscordColor.Red,
+                        Description = "There are no games to join! \nYou can create a new game by typing !create_game"
+                    };
+                    await ctx.Channel.DeleteMessageAsync(ctx.Message); //Delete the message that called the command
+                    var lastmessage = await ctx.Channel.SendMessageAsync(embed: message); //If there are no games, send a message
+                    await Task.Delay(5000);
+                    await lastmessage.DeleteAsync();
+                    }
                 }
             }
 
@@ -81,12 +121,13 @@ namespace MyTaskManagerBot.commands
                 {
                     if(game.ChannelId == ctx.Channel.Id)
                     {
-                        if(game.Players.First() == ctx.User.Username) //Check if the player who called !ready owner of the game
+                    if (game.Players.First() == ctx.User.Id) //Check if the player who called !ready owner of the game
                         {   
                             if(game.Players.Count >= 4) //Check if there are 4 or more players in the game
                             {
                                 game.IsReady = true; //Set the game to ready
                                 await ctx.Channel.SendMessageAsync("WE ARE STARTING!!! \nSORRY FOR EVERYONE WHO WAS LATE!"); //Send a message that the game is ready
+                                game.StartGame(); //Start the game
                             }
                             else
                             {
@@ -102,12 +143,25 @@ namespace MyTaskManagerBot.commands
                 }
             }
             [Command("contacts")]
-            public async Task ContactsCommand(CommandContext ctx)
+            public async Task ContactsCommand(CommandContext ctx){
+            var message = new DiscordEmbedBuilder
             {
-                await ctx.Channel.SendMessageAsync("Hey, My name is Aziz Shamuratov. I've developed this bot for you to enjoy. My discord is .azya \n"
-                    + "If you have any questions or suggestions, feel free to contact me! \n"
-                    + "I hope you enjoy playing Mafia with your friends!");
+                Title = "Hey, My name is Aziz Shamuratov. \nI've developed this bot for you to enjoy. My discord is .azya \n",
+                Description = "If you have any questions or suggestions, feel free to contact me! \nI hope you enjoy playing Mafia with your friends!",
+                Color = DiscordColor.White
+            };
+            await ctx.Channel.SendMessageAsync(message);
             }
+            
+            [Command("dm")]
+            public async Task dmcommand(CommandContext ctx) {
+                var message = new DiscordEmbedBuilder
+                {
+                    Title = "DM Command",
+                    Description = "This command is used to send a direct message to the user.",
+                    Color = DiscordColor.Green
+                }; //Send a direct message to the user who called the command
+        }
 
     }
 
@@ -120,7 +174,7 @@ namespace MyTaskManagerBot.commands
         // Parameters for the game
         public bool IsReady { get; set; }
         public ulong ChannelId { get; set; } //Channel ID where the game is played                                   
-        public List<string> Players { get; set; } //List of players in the game
+        public List<ulong> Players { get; set; } //List of players in the game
 
 
 
@@ -128,11 +182,11 @@ namespace MyTaskManagerBot.commands
         public Game(ulong channelId)
         {
             ChannelId = channelId;
-            Players = new List<string>();
+            Players = new List<ulong>();
             IsReady = false;
         }
 
-        public async Task AddPlayer(string playerId)
+        public async Task AddPlayer(ulong playerId)
         {
             if (!Players.Contains(playerId)) //Check if the player is already in the game
             {
@@ -141,13 +195,19 @@ namespace MyTaskManagerBot.commands
 
         }
 
+        public void StartGame()
+        {
+            // Logic to start the game
+            // This could include assigning roles, sending messages to players, etc.
+        }
+
     }
     public class Player
     {
         public int role { get; set; }
-        public string Name { get; set; }
+        public ulong Name { get; set; }
 
-        public Player(string userName)
+        public Player(ulong userName)
         {
             this.Name = userName;
         }
