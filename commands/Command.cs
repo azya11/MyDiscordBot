@@ -151,20 +151,12 @@ namespace MyTaskManagerBot.commands
                 Color = DiscordColor.White
             };
             await ctx.Channel.SendMessageAsync(message);
-            }
+        }
 
-        [Command("Settings)"] //create game settings menu to allow changing the amount of roles played in the game.
-            
-            [Command("dm")]
-            public async Task dmcommand(CommandContext ctx) {
-            var message = new DiscordEmbedBuilder
-            {
-                Title = "DM Command",
-                Description = "This command is used to send a direct message to the user.",
-                Color = DiscordColor.Green
-                }; //Send a direct message to the user who called the command
+            [Command("Settings)"] //create game settings menu to allow changing the amount of roles played in the game.
+            public async Task settingscommand(CommandContext ctx) {
+                //create a menu with buttons to change the configuration of the game, add roles and change the balance
             }
-
     }
 
 
@@ -213,9 +205,17 @@ namespace MyTaskManagerBot.commands
 
         }
 
-        public void StartGame(int amount_players)
+        public void StartGame()
         {
+            bool live = true;
             //Assign the roles to the players, without any rules yet.
+            while(live = true)
+            {
+                //check the people that are alive
+                // send them a turn notifications
+                // wait for input
+                // give the output
+            }
             //Send each player their role assignment
             // This could include assigning roles, sending messages to players, etc.
         }
