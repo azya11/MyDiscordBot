@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -155,8 +156,8 @@ namespace MyTaskManagerBot.commands
 
             [Command("Settings)"] //create game settings menu to allow changing the amount of roles played in the game.
             public async Task settingscommand(CommandContext ctx) {
-                //create a menu with buttons to change the configuration of the game, add roles and change the balance
-            }
+            //create a menu with buttons to change the configuration of the game, add roles and change the balance
+        }
     }
 
 
@@ -171,7 +172,7 @@ namespace MyTaskManagerBot.commands
         public List<ulong> Players { get; set; } //List of players in the game
         public int mafia { get; set; }
         public int doctor { get; set; }
-        public int cop {  get; set; }
+        public int cop { get; set; }
 
 
         // Constructor to initialize a new game with the channel ID
@@ -187,7 +188,7 @@ namespace MyTaskManagerBot.commands
             this.mafia++;
         }
 
-        public async Task addDoc ()
+        public async Task addDoc()
         {
             this.doc++;
         }
@@ -209,8 +210,17 @@ namespace MyTaskManagerBot.commands
         {
             bool live = true;
             //Assign the roles to the players, without any rules yet.
-            while(live = true)
+            while (live = true)
             {
+                foreach (ulong playerId in Players)
+                {
+                    while (Player.isLive = true)
+                    {
+                        async sendMessage(Player)
+                    }
+                }
+
+
                 //check the people that are alive
                 // send them a turn notifications
                 // wait for input
@@ -221,6 +231,11 @@ namespace MyTaskManagerBot.commands
         }
 
     }
+
+    public async Task sendMessage(Player targetPlayer)
+    {
+        //logic to send message to the players if there are alive
+    }
     public class Player
     {
         // 0 - Civillian
@@ -229,10 +244,13 @@ namespace MyTaskManagerBot.commands
         // 3 - Cop
         public int role { get; set; }
         public ulong Name { get; set; }
+        public bool isLive { get; set; }
 
         public Player(ulong userName)
         {
             this.Name = userName;
+            this.role = 0;
+            this.isLive = true;
         }
     }
 }
