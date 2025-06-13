@@ -205,7 +205,7 @@ namespace MyTaskManagerBot.commands
 
         }
 
-        public void StartGame()
+        public async Task StartGame()
         {
             bool live = true;
             //Assign the roles to the players, without any rules yet.
