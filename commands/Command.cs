@@ -152,16 +152,18 @@ namespace MyTaskManagerBot.commands
             };
             await ctx.Channel.SendMessageAsync(message);
             }
+
+        [Command("Settings)"] //create game settings menu to allow changing the amount of roles played in the game.
             
             [Command("dm")]
             public async Task dmcommand(CommandContext ctx) {
-                var message = new DiscordEmbedBuilder
-                {
-                    Title = "DM Command",
-                    Description = "This command is used to send a direct message to the user.",
-                    Color = DiscordColor.Green
+            var message = new DiscordEmbedBuilder
+            {
+                Title = "DM Command",
+                Description = "This command is used to send a direct message to the user.",
+                Color = DiscordColor.Green
                 }; //Send a direct message to the user who called the command
-        }
+            }
 
     }
 
@@ -175,7 +177,9 @@ namespace MyTaskManagerBot.commands
         public bool IsReady { get; set; }
         public ulong ChannelId { get; set; } //Channel ID where the game is played                                   
         public List<ulong> Players { get; set; } //List of players in the game
-
+        public int mafia { get; set; }
+        public int doctor { get; set; }
+        public int cop {  get; set; }
 
 
         // Constructor to initialize a new game with the channel ID
@@ -184,6 +188,20 @@ namespace MyTaskManagerBot.commands
             ChannelId = channelId;
             Players = new List<ulong>();
             IsReady = false;
+        }
+
+        public async Task addMafia()
+        {
+            this.mafia++;
+        }
+
+        public async Task addDoc ()
+        {
+            this.doc++;
+        }
+        public async Task addCop()
+        {
+            this.cop++
         }
 
         public async Task AddPlayer(ulong playerId)
@@ -195,15 +213,20 @@ namespace MyTaskManagerBot.commands
 
         }
 
-        public void StartGame()
+        public void StartGame(int amount_players)
         {
-            // Logic to start the game
+            //Assign the roles to the players, without any rules yet.
+            //Send each player their role assignment
             // This could include assigning roles, sending messages to players, etc.
         }
 
     }
     public class Player
     {
+        // 0 - Civillian
+        // 1 - Mafia
+        // 2 - Doctor
+        // 3 - Cop
         public int role { get; set; }
         public ulong Name { get; set; }
 
