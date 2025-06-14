@@ -219,8 +219,7 @@ namespace MyTaskManagerBot.commands
                         async sendMessage(Player)
                     }
                 }
-
-
+                
                 //check the people that are alive
                 // send them a turn notifications
                 // wait for input

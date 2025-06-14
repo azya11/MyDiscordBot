@@ -1,6 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using MyTaskManagerBot.commands; //Make sure to add your commands here
 
 namespace MyTaskManagerBot
@@ -23,7 +27,9 @@ namespace MyTaskManagerBot
             };
 
             _client = new DiscordClient(DiscordConfig); //Apply this config to our client
-
+            _client.UseInteractivity(new InteractivityConfiguration(){
+                Timeout = TimeSpan.FromMinutes(5)
+            });
             _client.Ready += _clientReady; //Subscribe to the Ready event
 
             var commandConfig = new CommandsNextConfiguration() //CommandsNext config
