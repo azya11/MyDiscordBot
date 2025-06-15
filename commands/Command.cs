@@ -154,7 +154,7 @@ namespace MyTaskManagerBot.commands
             await ctx.Channel.SendMessageAsync(message);
         }
 
-            [Command("Settings)"] //create game settings menu to allow changing the amount of roles played in the game.
+            [Command("Settings")] //create game settings menu to allow changing the amount of roles played in the game.
             public async Task settingscommand(CommandContext ctx) {
             //create a menu with buttons to change the configuration of the game, add roles and change the balance
         }
@@ -190,11 +190,11 @@ namespace MyTaskManagerBot.commands
 
         public async Task addDoc()
         {
-            this.doc++;
+            this.doctor++;
         }
         public async Task addCop()
         {
-            this.cop++
+            this.cop++;
         }
 
         public async Task AddPlayer(ulong playerId)
@@ -214,10 +214,10 @@ namespace MyTaskManagerBot.commands
             {
                 foreach (ulong playerId in Players)
                 {
-                    while (Player.isLive = true)
-                    {
-                        async sendMessage(Player)
-                    }
+                    //while (this.Players.= true)
+                    //{
+                    //    async sendMessage(Player)
+                    //}
                 }
                 
                 //check the people that are alive
@@ -231,10 +231,10 @@ namespace MyTaskManagerBot.commands
 
     }
 
-    public async Task sendMessage(Player targetPlayer)
-    {
-        //logic to send message to the players if there are alive
-    }
+    //public async Task sendMessage(Player targetPlayer)
+    //{
+    //    //logic to send message to the players if there are alive
+    //}
     public class Player
     {
         // 0 - Civillian
