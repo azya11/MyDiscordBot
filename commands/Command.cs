@@ -9,6 +9,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity.Extensions;
 
 namespace MyTaskManagerBot.commands
 {
@@ -152,11 +153,13 @@ namespace MyTaskManagerBot.commands
                 Color = DiscordColor.White
             };
             await ctx.Channel.SendMessageAsync(message);
-        }
+            }
 
-            [Command("Settings")] //create game settings menu to allow changing the amount of roles played in the game.
-            public async Task settingscommand(CommandContext ctx) {
-            //create a menu with buttons to change the configuration of the game, add roles and change the balance
+            [Command("test")] //create game settings menu to allow changing the amount of roles played in the game.
+            public async Task testcommand(CommandContext ctx)
+        {
+            var interactivity = Program.Client.GetInteractivity();
+            //use interactivity
         }
     }
 

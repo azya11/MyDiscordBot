@@ -11,8 +11,8 @@ namespace MyTaskManagerBot
 {
     internal class Program
     {
-        private static DiscordClient _client { get; set; }
-        private static CommandsNextExtension _commands { get; set; }
+        public static DiscordClient Client { get; set; }
+        private static CommandsNextExtension Commands { get; set; }
         static async Task Main(string[] args)
         {
             var JsonReader = new config.JSONReader();
@@ -26,11 +26,11 @@ namespace MyTaskManagerBot
                 AutoReconnect = true //Enable auto-reconnect
             };
 
-            _client = new DiscordClient(DiscordConfig); //Apply this config to our client
-            _client.UseInteractivity(new InteractivityConfiguration(){
+            Client = new DiscordClient(DiscordConfig); //Apply this config to our client
+            Client.UseInteractivity(new InteractivityConfiguration(){
                 Timeout = TimeSpan.FromMinutes(5)
             });
-            _client.Ready += _clientReady; //Subscribe to the Ready event
+            Client.Ready += ClientReady; //Subscribe to the Ready event
 
             var commandConfig = new CommandsNextConfiguration() //CommandsNext config
             {
@@ -40,15 +40,15 @@ namespace MyTaskManagerBot
                 EnableDefaultHelp = false, //I am gonna make my own help command
             };
 
-            _commands = _client.UseCommandsNext(commandConfig); //Apply this config to our commands
+            Commands = Client.UseCommandsNext(commandConfig); //Apply this config to our commands
 
-            _commands.RegisterCommands<commands.Command>(); //Register commands from the Commands class
+            Commands.RegisterCommands<commands.Command>(); //Register commands from the Commands class
 
-            await _client.ConnectAsync(); //Connect to Discord
+            await Client.ConnectAsync(); //Connect to Discord
             await Task.Delay(-1); //Wait indefinitely to make sure the bot stays online for as long as possible
         }
 
-        public static Task _clientReady(DiscordClient client, DSharpPlus.EventArgs.ReadyEventArgs e)
+        public static Task ClientReady(DiscordClient client, DSharpPlus.EventArgs.ReadyEventArgs e)
         {
             return Task.CompletedTask; //Return a completed task
         }
