@@ -100,6 +100,8 @@ namespace MyTaskManagerBot.commands
                         Color = DiscordColor.Green
                     };
                     await ctx.Channel.SendMessageAsync(embed: okaymessage);
+                    var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                    await member.SendMessageAsync("Вы присоединились к игре!");
                 }
                 else
                 {
