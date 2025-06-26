@@ -152,6 +152,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="commands\Command.cs" />
+    <Compile Include="commands\MafiaLogic.cs" />
     <Compile Include="config\JSONReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
