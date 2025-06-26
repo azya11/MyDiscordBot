@@ -59,7 +59,7 @@ namespace MyTaskManagerBot.commands
                     }
                 }
             }
-            await newGame.AddPlayer(ctx.User.Id); //Add the player who created the game to the game
+            await newGame.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id)); //Add the player who created the game to the game
             this.currentGames.Add(newGame);
             var created = new DiscordEmbedBuilder
             {
@@ -92,7 +92,7 @@ namespace MyTaskManagerBot.commands
             {
                 if (game.ChannelId == ctx.Channel.Id)
                 {
-                    await game.AddPlayer(ctx.User.Id);
+                    await game.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id));
                     var okaymessage = new DiscordEmbedBuilder
                     {
                         Title = $"{ctx.User.Username} have joined the game!",
@@ -126,7 +126,7 @@ namespace MyTaskManagerBot.commands
             {
                 if (game.ChannelId == ctx.Channel.Id)
                 {
-                    if (game.Players.First().ID == ctx.User.Id) //Check if the player who called !ready owner of the game
+                    if (game.Players.First().Member == await ctx.Guild.GetMemberAsync(ctx.User.Id)); //Check if the player who called !ready owner of the game
                     {
                         if (game.Players.Count >= 4) //Check if there are 4 or more players in the game
                         {
@@ -138,15 +138,13 @@ namespace MyTaskManagerBot.commands
                         {
                             await ctx.Channel.SendMessageAsync("There are not enough players to start the game! \nYou need at least 4 players to start the game!"); //If there are not enough players, send a message
                         }
-
                     }
-                    else
-                    {
-                        await ctx.Channel.SendMessageAsync("You are not the creator of the game! \nOnly creator can call !ready"); //If the player is not the first player, send a message
-                    }
+                    //else{
+                    //await ctx.Channel.SendMessageAsync("You are not the creator of the game! \nOnly creator can call !ready"); //If the player is not the first player, send a message
                 }
             }
         }
+        
         [Command("contacts")]
         public async Task ContactsCommand(CommandContext ctx)
         {
@@ -224,7 +222,7 @@ namespace MyTaskManagerBot.commands
             this.cop++;
         }
 
-        public async Task AddPlayer(ulong playerId)
+        public async Task AddPlayer(DiscordMember playerId)
         {
             Player player = new Player(playerId);
             if (!Players.Contains(player)) //Check if the player is already in the game
@@ -270,12 +268,12 @@ namespace MyTaskManagerBot.commands
         // 2 - Doctor
         // 3 - Cop
         public int role { get; set; }
-        public ulong ID { get; set; }
+        public DiscordMember Member { get; set; }
         public bool isLive { get; set; }
 
-        public Player(ulong ID)
+        public Player(DiscordMember Member)
         {
-            this.ID = ID;
+            this.Member = Member;
             this.role = 0;
             this.isLive = true;
         }
