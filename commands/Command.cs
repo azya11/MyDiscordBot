@@ -179,6 +179,11 @@ namespace MyTaskManagerBot.commands
             }
             var totalReactions = await interactivity.CollectReactionsAsync(sentMessage, jointime);
         }
+        [Command("dm")]
+        public async Task dmcommand(CommandContext ctx) {
+            var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+            await member.SendMessageAsync("Ответ");
+        }
     }
 
         //CLASS GAME
@@ -262,12 +267,12 @@ namespace MyTaskManagerBot.commands
         // 2 - Doctor
         // 3 - Cop
         public int role { get; set; }
-        public ulong Name { get; set; }
+        public DiscordMember Name { get; set; }
         public bool isLive { get; set; }
 
-        public Player(ulong userName)
+        public Player(DiscordMember Name)
         {
-            this.Name = userName;
+            this.Name = Name;
             this.role = 0;
             this.isLive = true;
         }
