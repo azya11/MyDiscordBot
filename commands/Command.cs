@@ -124,7 +124,7 @@ namespace MyTaskManagerBot.commands
             {
                 if (game.ChannelId == ctx.Channel.Id)
                 {
-                    if (game.Players.First() == ctx.User.Id) //Check if the player who called !ready owner of the game
+                    if (game.Players.First().ID == ctx.User.Id) //Check if the player who called !ready owner of the game
                     {
                         if (game.Players.Count >= 4) //Check if there are 4 or more players in the game
                         {
@@ -194,7 +194,7 @@ namespace MyTaskManagerBot.commands
         // Parameters for the game
         public bool IsReady { get; set; }
         public ulong ChannelId { get; set; } //Channel ID where the game is played                                   
-        public List<ulong> Players { get; set; } //List of players in the game
+        public List<Player> Players { get; set; } //List of players in the game
         public int mafia { get; set; }
         public int doctor { get; set; }
         public int cop { get; set; }
@@ -204,7 +204,7 @@ namespace MyTaskManagerBot.commands
         public Game(ulong channelId)
         {
             ChannelId = channelId;
-            Players = new List<ulong>();
+            Players = new List<Player>();
             IsReady = false;
         }
 
@@ -224,9 +224,10 @@ namespace MyTaskManagerBot.commands
 
         public async Task AddPlayer(ulong playerId)
         {
-            if (!Players.Contains(playerId)) //Check if the player is already in the game
+            Player player = new Player(playerId);
+            if (!Players.Contains(player)) //Check if the player is already in the game
             {
-                Players.Add(playerId);
+                Players.Add(player);
             }
 
         }
@@ -235,9 +236,9 @@ namespace MyTaskManagerBot.commands
         {
             bool live = true;
             //Assign the roles to the players, without any rules yet.
-            while (live = true)
+            while (live == true)
             {
-                foreach (ulong playerId in Players)
+                foreach (Player player in Players)
                 {
                     //while (this.Players.= true)
                     //{
@@ -267,12 +268,12 @@ namespace MyTaskManagerBot.commands
         // 2 - Doctor
         // 3 - Cop
         public int role { get; set; }
-        public DiscordMember Name { get; set; }
+        public ulong ID { get; set; }
         public bool isLive { get; set; }
 
-        public Player(DiscordMember Name)
+        public Player(ulong ID)
         {
-            this.Name = Name;
+            this.ID = ID;
             this.role = 0;
             this.isLive = true;
         }
