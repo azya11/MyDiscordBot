@@ -68,6 +68,8 @@ namespace MyTaskManagerBot.commands
                 Description = "Type !join to enter the game",
                 Color = DiscordColor.Green
             };
+            var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+            await member.SendMessageAsync("Вы создали игру и являетесь хостом, мы можете прописать комманду !ready чтобы запустить игру  присоединились к игре!");
             await ctx.Channel.SendMessageAsync(embed: created);
         }
 
@@ -93,16 +95,21 @@ namespace MyTaskManagerBot.commands
             {
                 if (game.ChannelId == ctx.Channel.Id)
                 {
-                    await game.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id));
-                    var okaymessage = new DiscordEmbedBuilder
-                    {
+                    var member = ctx.Guild.GetMemberAsync(ctx.User.Id);
+                    Player player = new Player(await ctx.Guild.GetMemberAsync(ctx.User.Id));
+                    if (game.Players.Contains(player)==true){
+                        await game.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id));
+                        var okaymessage = new DiscordEmbedBuilder
+                        {
                         Title = $"{ctx.User.Username} have joined the game!",
                         Description = $"Players in the game:\n{string.Join("\n", game.Players.Select(p => p.ToString()))}",
                         Color = DiscordColor.Green
-                    };
-                    await ctx.Channel.SendMessageAsync(embed: okaymessage);
-                    var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
-                    await member.SendMessageAsync("Вы присоединились к игре!");
+                        };
+                        await ctx.Channel.SendMessageAsync(embed: okaymessage);
+                        var member1 = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                        await member1.SendMessageAsync("Вы присоединились к игре!");
+                    } 
+                    //ELSE DELETE THE MESSAGE WAS CALLED AND DM THAT PERSON IS ALREADY IN THE GAME
                 }
                 else
                 {
