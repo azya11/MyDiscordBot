@@ -80,8 +80,8 @@ namespace MyTaskManagerBot.commands
             {
                 var noGames = new DiscordEmbedBuilder
                 {
-                    Title = "❌ Нет доступных игр",
-                    Description = "Создай игру с помощью `!create_game`",
+                    Title = "❌ No games availabe",
+                    Description = "Create game with `!create_game`",
                     Color = DiscordColor.Red
                 };
                 await ctx.Channel.SendMessageAsync(embed: noGames);
@@ -92,7 +92,7 @@ namespace MyTaskManagerBot.commands
 
             if (game == null)
             {
-                await ctx.Channel.SendMessageAsync("❌ В этом канале нет активной игры!");
+                await ctx.Channel.SendMessageAsync("❌ There is no active game in this channel");
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace MyTaskManagerBot.commands
             // проверка, есть ли игрок уже
             if (game.Players.Any(p => p.Member.Id == member.Id))
             {
-                await member.SendMessageAsync("⚠️ Вы уже в этой игре!");
+                await member.SendMessageAsync("⚠️ You are already in this game!");
                 return;
             }
 
@@ -109,13 +109,13 @@ namespace MyTaskManagerBot.commands
             var playerList = string.Join("\n", game.Players.Select(p => p.Member.DisplayName));
             var joined = new DiscordEmbedBuilder
             {
-                Title = $"{ctx.User.Username} присоединился к игре!",
-                Description = $"🎮 Текущее количество игроков: {game.Players.Count}\n\n**Список игроков:**\n{playerList}",
+                Title = $"{ctx.User.Username} joined game!",
+                Description = $"🎮 Current players: {game.Players.Count}\n\n**Players List:**\n{playerList}",
                 Color = DiscordColor.Green
             };
 
             await ctx.Channel.SendMessageAsync(embed: joined);
-            await member.SendMessageAsync("✅ Вы успешно присоединились к игре!");
+            await member.SendMessageAsync("✅ You have succsessfully joined!");
         }
 
 
