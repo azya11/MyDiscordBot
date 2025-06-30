@@ -97,19 +97,24 @@ namespace MyTaskManagerBot.commands
                 {
                     var member = ctx.Guild.GetMemberAsync(ctx.User.Id);
                     Player player = new Player(await ctx.Guild.GetMemberAsync(ctx.User.Id));
-                    if (game.Players.Contains(player)==true){
+                    if (game.Players.Contains(player) == true)
+                    {
                         await game.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id));
                         var okaymessage = new DiscordEmbedBuilder
                         {
-                        Title = $"{ctx.User.Username} have joined the game!",
-                        Description = $"Players in the game:\n{string.Join("\n", game.Players.Select(p => p.ToString()))}",
-                        Color = DiscordColor.Green
+                            Title = $"{ctx.User.Username} have joined the game!",
+                            Description = $"Players in the game:\n{string.Join("\n", game.Players.Select(p => p.ToString()))}",
+                            Color = DiscordColor.Green
                         };
                         await ctx.Channel.SendMessageAsync(embed: okaymessage);
                         var member1 = await ctx.Guild.GetMemberAsync(ctx.User.Id);
                         await member1.SendMessageAsync("Вы присоединились к игре!");
-                    } 
-                    //ELSE DELETE THE MESSAGE WAS CALLED AND DM THAT PERSON IS ALREADY IN THE GAME
+                    }
+                    else 
+                    {
+                        var member1 = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+                        await member1.SendMessageAsync("Вы уже присоединились к этой игре!");
+                    }//DELETE THE MESSAGE WAS CALLED AND DM THAT PERSON IS ALREADY IN THE GAME
                 }
                 else
                 {
@@ -134,7 +139,7 @@ namespace MyTaskManagerBot.commands
             {
                 if (game.ChannelId == ctx.Channel.Id)
                 {
-                    if (game.Players.First().Member == await ctx.Guild.GetMemberAsync(ctx.User.Id)); //Check if the player who called !ready owner of the game
+                    if (game.Players.First().Member == await ctx.Guild.GetMemberAsync(ctx.User.Id)) //Check if the player who called !ready owner of the game
                     {
                         if (game.Players.Count >= 4) //Check if there are 4 or more players in the game
                         {
@@ -147,9 +152,12 @@ namespace MyTaskManagerBot.commands
                             await ctx.Channel.SendMessageAsync("There are not enough players to start the game! \nYou need at least 4 players to start the game!"); //If there are not enough players, send a message
                         }
                     }
-                    //else{
-                    //await ctx.Channel.SendMessageAsync("You are not the creator of the game! \nOnly creator can call !ready"); //If the player is not the first player, send a message
+                    else
+                    {
+                        await ctx.Channel.SendMessageAsync("You are not the creator of the game! \nOnly creator can call !ready"); //If the player is not the first player, send a message
+                    }
                 }
+
             }
         }
         
