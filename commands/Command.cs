@@ -76,61 +76,48 @@ namespace MyTaskManagerBot.commands
         [Command("join")]
         public async Task JoinGameCommand(CommandContext ctx)
         {
-            if (this.currentGames == null || !this.currentGames.Any()) //Check if there are any games in the list
+            if (this.currentGames == null || !this.currentGames.Any())
             {
-                var message = new DiscordEmbedBuilder
+                var noGames = new DiscordEmbedBuilder
                 {
-                    Title = "No games available",
-                    Color = DiscordColor.Red,
-                    Description = "There are no games to join! \nYou can create a new game by typing !create_game"
+                    Title = "❌ Нет доступных игр",
+                    Description = "Создай игру с помощью `!create_game`",
+                    Color = DiscordColor.Red
                 };
-                await ctx.Channel.DeleteMessageAsync(ctx.Message); //Delete the message that called the command
-                var lastmessage = await ctx.Channel.SendMessageAsync(embed: message); //If there are no games, send a message
-                await Task.Delay(5000);
-                await lastmessage.DeleteAsync();
+                await ctx.Channel.SendMessageAsync(embed: noGames);
+                return;
+            }
 
-                return; //Exit the method
-            }
-            foreach (var game in this.currentGames)
+            var game = this.currentGames.FirstOrDefault(g => g.ChannelId == ctx.Channel.Id);
+
+            if (game == null)
             {
-                if (game.ChannelId == ctx.Channel.Id)
-                {
-                    var member = ctx.Guild.GetMemberAsync(ctx.User.Id);
-                    Player player = new Player(await ctx.Guild.GetMemberAsync(ctx.User.Id));
-                    if (game.Players.Contains(player) == true)
-                    {
-                        await game.AddPlayer(await ctx.Guild.GetMemberAsync(ctx.User.Id));
-                        var okaymessage = new DiscordEmbedBuilder
-                        {
-                            Title = $"{ctx.User.Username} have joined the game!",
-                            Description = $"Players in the game:\n{string.Join("\n", game.Players.Select(p => p.ToString()))}",
-                            Color = DiscordColor.Green
-                        };
-                        await ctx.Channel.SendMessageAsync(embed: okaymessage);
-                        var member1 = await ctx.Guild.GetMemberAsync(ctx.User.Id);
-                        await member1.SendMessageAsync("Вы присоединились к игре!");
-                    }
-                    else 
-                    {
-                        var member1 = await ctx.Guild.GetMemberAsync(ctx.User.Id);
-                        await member1.SendMessageAsync("Вы уже присоединились к этой игре!");
-                    }//DELETE THE MESSAGE WAS CALLED AND DM THAT PERSON IS ALREADY IN THE GAME
-                }
-                else
-                {
-                    var message = new DiscordEmbedBuilder
-                    {
-                        Title = "No games available",
-                        Color = DiscordColor.Red,
-                        Description = "There are no games to join! \nYou can create a new game by typing !create_game"
-                    };
-                    await ctx.Channel.DeleteMessageAsync(ctx.Message); //Delete the message that called the command
-                    var lastmessage = await ctx.Channel.SendMessageAsync(embed: message); //If there are no games, send a message
-                    await Task.Delay(5000);
-                    await lastmessage.DeleteAsync();
-                }
+                await ctx.Channel.SendMessageAsync("❌ В этом канале нет активной игры!");
+                return;
             }
+
+            var member = await ctx.Guild.GetMemberAsync(ctx.User.Id);
+
+            // проверка, есть ли игрок уже
+            if (game.Players.Any(p => p.Member.Id == member.Id))
+            {
+                await member.SendMessageAsync("⚠️ Вы уже в этой игре!");
+                return;
+            }
+
+            await game.AddPlayer(member);
+            var playerList = string.Join("\n", game.Players.Select(p => p.Member.DisplayName));
+            var joined = new DiscordEmbedBuilder
+            {
+                Title = $"{ctx.User.Username} присоединился к игре!",
+                Description = $"🎮 Текущее количество игроков: {game.Players.Count}\n\n**Список игроков:**\n{playerList}",
+                Color = DiscordColor.Green
+            };
+
+            await ctx.Channel.SendMessageAsync(embed: joined);
+            await member.SendMessageAsync("✅ Вы успешно присоединились к игре!");
         }
+
 
         [Command("ready")]
         public async Task ReadyCommand(CommandContext ctx)
