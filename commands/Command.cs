@@ -35,7 +35,7 @@ namespace MyTaskManagerBot.commands
 
         public async Task CreateGameCommand(CommandContext ctx)
         {
-            Game newGame = new Game(ctx.Channel.Id);
+            Game newGame = new Game(ctx.Channel.Id, this.currentGames);
             if (this.currentGames == null) //Check if the list of games is null
             {
                 this.currentGames = new List<Game>(); //If it is, create a new list

@@ -5,7 +5,6 @@ using MyTaskManagerBot.commands;
 using System.Linq;
 using System;
 using MyTaskManagerBot;
-
 public class Game
 {
     //events
@@ -18,13 +17,14 @@ public class Game
     public int doctor { get; set; }
     public int cop { get; set; }
 
-
+    private List<Game> _gameList;
     // Constructor to initialize a new game with the channel ID
-    public Game(ulong channelId)
+    public Game(ulong channelId, List<Game> gameList)
     {
         ChannelId = channelId;
         Players = new List<Player>();
         IsReady = false;
+        _gameList = gameList;
     }
 
     public async Task addMafia()
@@ -63,7 +63,7 @@ public class Game
         }
 
         await AnnounceWinner();
-        Program.currentGames.Remove(this); // Удаление игры из списка
+        _gameList.Remove(this); // Удаление игры из списка
     }
     private async Task NightPhase()
     {
@@ -91,11 +91,13 @@ public class Game
         if (target != null && target != healed)
         {
             target.isLive = false;
-            await GetChannel().SendMessageAsync($"💀 Игрок {target.Member.DisplayName} был убит этой ночью.");
+            var channel1 = await GetChannel();
+            await channel1.SendMessageAsync($"💀 Игрок {target.Member.DisplayName} был убит этой ночью.");
         }
         else
         {
-            await GetChannel().SendMessageAsync("🌙 Никто не погиб этой ночью.");
+            var channel1 = await GetChannel();
+            await channel1.SendMessageAsync("🌙 Никто не погиб этой ночью.");
         }
     }
     private async Task DayPhase()
@@ -106,7 +108,8 @@ public class Game
         if (voteTarget != null)
         {
             voteTarget.isLive = false;
-            await GetChannel().SendMessageAsync($"⚰️ Игрок {voteTarget.Member.DisplayName} был казнен по решению большинства.");
+            var channel1 = await GetChannel();
+            await channel1.SendMessageAsync($"⚰️ Игрок {voteTarget.Member.DisplayName} был казнен по решению большинства.");
         }
     }
     private bool IsGameOver()
@@ -119,7 +122,8 @@ public class Game
     {
         int mafia = Players.Count(p => p.isLive && p.role == 1);
         string winner = mafia == 0 ? "Город победил! 🎉" : "Мафия победила! 💀";
-        await GetChannel().SendMessageAsync($"🏆 {winner}");
+        var channel = await GetChannel();
+        await channel.SendMessageAsync($"🏆 {winner}");
     }
 
     public async Task AssignRoles()
@@ -160,7 +164,7 @@ public class Game
                     roleName = "WASUP DOCTOR!";
                     break;
                 case 3:
-                    roleName = "HEY SHERIFF SHOULD WE SHOOT SOME NIGGERS?";
+                    roleName = "HEY SHERIFF SHOULD WE SHOOT SOME BAD GUYS?";
                     break;
                 default:
                     roleName = "Your are just basic person, nothing crazy.";
@@ -170,6 +174,41 @@ public class Game
             await player.Member.SendMessageAsync($"📢 {roleName}");
         }
     }
+
+    private async Task<Player> CollectVote(string prompt, Player voter, List<Player> options)
+    {
+        var channel = await Program.Client.GetChannelAsync(ChannelId);
+        await voter.Member.SendMessageAsync(prompt + "\n" + string.Join("\n", options.Select((p, i) => $"{i + 1}. {p.Member.DisplayName}")));
+
+        // Вставь сюда свою логику ожидания ответа (например, interactivity)
+        // пока просто имитация выбора случайного игрока:
+        await Task.Delay(1000);
+        return options[new Random().Next(options.Count)];
+    }
+
+    private async Task<Player> CollectVotes(string prompt, List<Player> voters, List<Player> options)
+    {
+        // Собери выборы от всех участников
+        List<Player> votes = new List<Player>();
+        foreach (var voter in voters)
+        {
+            var vote = await CollectVote(prompt, voter, options);
+            votes.Add(vote);
+        }
+
+        // Найди игрока с наибольшим количеством голосов
+        var mostVoted = votes
+            .GroupBy(v => v)
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault()?.Key;
+
+        return mostVoted;
+    }
+    private async Task<DiscordChannel> GetChannel()
+    {
+        return await Program.Client.GetChannelAsync(ChannelId);
+    }
+
 
 
 }
