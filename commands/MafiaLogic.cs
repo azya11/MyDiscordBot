@@ -27,19 +27,18 @@ public class Game
         _gameList = gameList;
     }
 
-    public async Task addMafia()
-    {
-        this.mafia++;
-    }
-
-    public async Task addDoc()
-    {
-        this.doctor++;
-    }
-    public async Task addCop()
-    {
-        this.cop++;
-    }
+    //public async Task addMafia()
+    //{
+    //    this.mafia++;
+    //}
+    //public async Task addDoc()
+    //{
+    //    this.doctor++;
+    //}
+    //public async Task addCop()
+    //{
+    //    this.cop++;
+    //}
 
     public async Task AddPlayer(DiscordMember playerId)
     {
@@ -161,13 +160,13 @@ public class Game
                     roleName = "You are MAFIA!";
                     break;
                 case 2:
-                    roleName = "WASUP DOCTOR!";
+                    roleName = "You are DOCTOR!";
                     break;
                 case 3:
-                    roleName = "HEY SHERIFF SHOULD WE SHOOT SOME BAD GUYS?";
+                    roleName = "You are SHERIFF!";
                     break;
                 default:
-                    roleName = "Your are just basic person, nothing crazy.";
+                    roleName = "You are CIVILLIAN!";
                     break;
             }
 
