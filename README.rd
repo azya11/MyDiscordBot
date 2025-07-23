@@ -7,3 +7,6 @@
 6. Чтобы она ролилась пока не останется только одна команда
 7. Чтобы она публиковала в чат кто победил
 8. Удаляла обьект Game после окончания игры
+(THIS IS GHOST REPOSITORY)
+(NO MORE UPDATES ARE CREATED HERE)
+(WAIT FOR THE OFFICIAL RELEASE)
