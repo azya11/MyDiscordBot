@@ -13,40 +13,46 @@ namespace MyTaskManagerBot
     {
         public static DiscordClient Client { get; set; }
         private static CommandsNextExtension Commands { get; set; }
-        static async Task Main(string[] args)
+        static void Main(string[] args)
+        {
+            MainAsync().GetAwaiter().GetResult();
+        }
+
+        static async Task MainAsync()
         {
             var JsonReader = new config.JSONReader();
             await JsonReader.ReadJSON();
 
-            var DiscordConfig = new DiscordConfiguration() //Discord config 
+            var DiscordConfig = new DiscordConfiguration()
             {
                 Intents = DiscordIntents.All,
-                Token = JsonReader.Token, //Pass token from JSON
-                TokenType = TokenType.Bot, //Specify that this is a bot token
-                AutoReconnect = true //Enable auto-reconnect
+                Token = JsonReader.Token,
+                TokenType = TokenType.Bot,
+                AutoReconnect = true
             };
 
-            Client = new DiscordClient(DiscordConfig); //Apply this config to our client
-            Client.UseInteractivity(new InteractivityConfiguration(){
+            Client = new DiscordClient(DiscordConfig);
+            Client.UseInteractivity(new InteractivityConfiguration()
+            {
                 Timeout = TimeSpan.FromMinutes(5)
             });
-            Client.Ready += ClientReady; //Subscribe to the Ready event
+            Client.Ready += ClientReady;
 
-            var commandConfig = new CommandsNextConfiguration() //CommandsNext config
+            var commandConfig = new CommandsNextConfiguration()
             {
                 StringPrefixes = new string[] { JsonReader.Prefix },
-                EnableMentionPrefix = true, //Enable mention prefix
-                EnableDms = true, //Enable DMs
-                EnableDefaultHelp = false, //I am gonna make my own help command
+                EnableMentionPrefix = true,
+                EnableDms = true,
+                EnableDefaultHelp = false,
             };
 
-            Commands = Client.UseCommandsNext(commandConfig); //Apply this config to our commands
+            Commands = Client.UseCommandsNext(commandConfig);
+            Commands.RegisterCommands<commands.Command>();
 
-            Commands.RegisterCommands<commands.Command>(); //Register commands from the Commands class
-
-            await Client.ConnectAsync(); //Connect to Discord
-            await Task.Delay(-1); //Wait indefinitely to make sure the bot stays online for as long as possible
+            await Client.ConnectAsync();
+            await Task.Delay(-1); // держим процесс бесконечно
         }
+
 
         public static Task ClientReady(DiscordClient client, DSharpPlus.EventArgs.ReadyEventArgs e)
         {

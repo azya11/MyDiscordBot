@@ -5,6 +5,7 @@ using MyTaskManagerBot.commands;
 using System.Linq;
 using System;
 using MyTaskManagerBot;
+using DSharpPlus.Interactivity.Extensions;
 public class Game
 {
     //events
@@ -16,6 +17,8 @@ public class Game
     public int mafia { get; set; }
     public int doctor { get; set; }
     public int cop { get; set; }
+    private DSharpPlus.Interactivity.InteractivityExtension Interactivity
+    => Program.Client.GetInteractivity();
 
     private List<Game> _gameList;
     // Constructor to initialize a new game with the channel ID
@@ -26,7 +29,8 @@ public class Game
         IsReady = false;
         _gameList = gameList;
     }
-
+    private static readonly TimeSpan DefaultVoteTimeout = TimeSpan.FromSeconds(120);
+    private static readonly Random Rng = new Random();
     //public async Task addMafia()
     //{
     //    this.mafia++;
@@ -174,35 +178,92 @@ public class Game
         }
     }
 
-    private async Task<Player> CollectVote(string prompt, Player voter, List<Player> options)
+    private async Task<Player> CollectVote(string prompt, Player voter, List<Player> options, TimeSpan? timeout = null)
     {
-        var channel = await Program.Client.GetChannelAsync(ChannelId);
-        await voter.Member.SendMessageAsync(prompt + "\n" + string.Join("\n", options.Select((p, i) => $"{i + 1}. {p.Member.DisplayName}")));
+        // DM the voter with numbered options
+        var dm = await voter.Member.CreateDmChannelAsync();
+        var lines = string.Join("\n", options.Select((p, i) => $"{i + 1}. {p.Member.DisplayName}"));
+        await dm.SendMessageAsync($"{prompt}\n\nОтветьте **числом** (1–{options.Count}) или упомяните игрока.\n\n{lines}");
 
-        // Вставь сюда свою логику ожидания ответа (например, interactivity)
-        // пока просто имитация выбора случайного игрока:
-        await Task.Delay(1000);
-        return options[new Random().Next(options.Count)];
-    }
+        var limit = timeout ?? DefaultVoteTimeout;
 
-    private async Task<Player> CollectVotes(string prompt, List<Player> voters, List<Player> options)
-    {
-        // Собери выборы от всех участников
-        List<Player> votes = new List<Player>();
-        foreach (var voter in voters)
+        // Wait for a message from the voter in THIS DM
+        var result = await Interactivity.WaitForMessageAsync(
+            m => m.ChannelId == dm.Id && m.Author.Id == voter.Member.Id,
+            limit
+        );
+
+        if (result.TimedOut || result.Result is null)
         {
-            var vote = await CollectVote(prompt, voter, options);
-            votes.Add(vote);
+            await dm.SendMessageAsync("⏰ Время вышло. Голос не засчитан.");
+            return null;
         }
 
-        // Найди игрока с наибольшим количеством голосов
-        var mostVoted = votes
-            .GroupBy(v => v)
-            .OrderByDescending(g => g.Count())
-            .FirstOrDefault()?.Key;
+        var content = result.Result.Content.Trim();
 
-        return mostVoted;
+        // 1) Try number
+        if (int.TryParse(content, out var idx))
+        {
+            if (idx >= 1 && idx <= options.Count)
+            {
+                var pick = options[idx - 1];
+                await dm.SendMessageAsync($"✅ Принято: **{pick.Member.DisplayName}**");
+                return pick;
+            }
+            await dm.SendMessageAsync("⚠️ Неверный номер. Голос не засчитан.");
+            return null;
+        }
+
+        // 2) Try mention
+        if (result.Result.MentionedUsers.Any())
+        {
+            var id = result.Result.MentionedUsers.First().Id;
+            var pick = options.FirstOrDefault(p => p.Member.Id == id);
+            if (pick != null)
+            {
+                await dm.SendMessageAsync($"✅ Принято: **{pick.Member.DisplayName}**");
+                return pick;
+            }
+            await dm.SendMessageAsync("⚠️ Такого игрока нет среди доступных.");
+            return null;
+        }
+
+        // 3) Try exact name match
+        var byName = options.FirstOrDefault(p =>
+            string.Equals(p.Member.DisplayName, content, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(p.Member.Username, content, StringComparison.OrdinalIgnoreCase));
+
+        if (byName != null)
+        {
+            await dm.SendMessageAsync($"✅ Принято: **{byName.Member.DisplayName}**");
+            return byName;
+        }
+
+        await dm.SendMessageAsync("⚠️ Не распознал выбор. Голос не засчитан.");
+        return null;
     }
+
+
+    private async Task<Player> CollectVotes(string prompt, List<Player> voters, List<Player> options, TimeSpan? timeout = null)
+    {
+        // Run all voters concurrently (each via DM)
+        var tasks = voters.Select(v => CollectVote(prompt, v, options, timeout)).ToList();
+        var picks = await Task.WhenAll(tasks);
+
+        // Tally valid votes
+        var valid = picks.Where(p => p != null).ToList();
+        if (valid.Count == 0) return null;
+
+        // Plurality winner; break ties randomly;
+        var groups = valid.GroupBy(p => p).OrderByDescending(g => g.Count()).ToList();
+        var topCount = groups.First().Count();
+        var topGroup = groups.Where(g => g.Count() == topCount).Select(g => g.Key).ToList();
+
+        return topGroup.Count == 1
+            ? topGroup[0]
+            : topGroup[Rng.Next(topGroup.Count)];
+    }
+
     private async Task<DiscordChannel> GetChannel()
     {
         return await Program.Client.GetChannelAsync(ChannelId);
